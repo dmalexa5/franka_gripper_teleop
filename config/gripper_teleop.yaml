@@ -2,18 +2,18 @@ gripper_teleop_node:
   ros__parameters:
     serial_port: "/dev/ttyACM0"
     serial_baud_rate: 19200
-    serial_timeout_sec: 1.0
-    command_frequency_hz: 10.0
+    serial_timeout_sec: 0.02
+    command_frequency_hz: 20.0
 
-    grasp_force: 10.0
-    grasp_speed: 0.1
-    move_speed: 0.1
+    grasp_force: 50.0
+    grasp_speed: 0.10
+    move_speed: 0.10
     close_width: 0.0
     open_width: 0.08
-    grasp_epsilon_inner: 0.005
-    grasp_epsilon_outer: 0.005
+    grasp_epsilon_inner: 0.08
+    grasp_epsilon_outer: 0.08
 
     grasp_action_name: "franka_gripper/grasp"
     move_action_name: "franka_gripper/move"
 
-    warn_throttle_sec: 5.0
+    warn_throttle_sec: 3.0

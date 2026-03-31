@@ -34,7 +34,7 @@ except ImportError:  # pragma: no cover - handled as runtime dependency problem
 
 class CommandState(str, Enum):
     OPEN = 'OPEN'
-    CLOSE = 'CLOSE'
+    GRIP = 'GRIP'
     NONE = 'NONE'
 
 
@@ -44,7 +44,7 @@ class FrankaGripperTeleopNode(Node):
         super().__init__('gripper_teleop_node')
 
         self.declare_parameter('serial_port', '/dev/ttyACM0')
-        self.declare_parameter('serial_baud_rate', 115200)
+        self.declare_parameter('serial_baud_rate', 19200)
         self.declare_parameter('serial_timeout_sec', 0.02)
         self.declare_parameter('command_frequency_hz', 10.0)
         self.declare_parameter('grasp_force', 10.0)
@@ -108,7 +108,7 @@ class FrankaGripperTeleopNode(Node):
         if desired_state == self._last_dispatched_state:
             return
 
-        if desired_state == CommandState.CLOSE:
+        if desired_state == CommandState.GRIP:
             sent = self._send_close_goal()
         else:
             sent = self._send_open_goal()
@@ -123,6 +123,11 @@ class FrankaGripperTeleopNode(Node):
         assert self._serial_connection is not None
         try:
             raw_line = self._serial_connection.readline()
+            while raw_line and self._serial_connection.in_waiting > 0:
+                next_line = self._serial_connection.readline()
+                if not next_line:
+                    break
+                raw_line = next_line
         except SerialException as exc:
             self.get_logger().warn(
                 f'Error while reading serial input: {exc}. Falling back to NONE mode.',
@@ -137,8 +142,8 @@ class FrankaGripperTeleopNode(Node):
         token = raw_line.decode('utf-8', errors='ignore').strip().upper()
         if token == 'OPEN':
             self._last_valid_state = CommandState.OPEN
-        elif token in ('CLOSE', 'CLOSED'):
-            self._last_valid_state = CommandState.CLOSE
+        elif token == 'GRIP':
+            self._last_valid_state = CommandState.GRIP
         elif token:
             self.get_logger().warn(
                 f"Unknown serial token '{token}'. Keeping '{self._last_valid_state.value}'.",
@@ -207,7 +212,7 @@ class FrankaGripperTeleopNode(Node):
         goal_future.add_done_callback(self._goal_response_callback)
         self._goal_futures.append(goal_future)
 
-        self.get_logger().info('Sent CLOSE gripper goal.')
+        self.get_logger().info('Sent GRIP gripper goal.')
         return True
 
     def _send_open_goal(self) -> bool:
