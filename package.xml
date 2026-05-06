@@ -6,9 +6,7 @@
   <description>Serial teleoperation node for controlling a Franka gripper in ROS 2.</description>
   <maintainer email="dmalexa5@ncsu.edu">David Alexander</maintainer>
   <license>Apache 2.0</license>
-
-  <buildtool_depend>ament_python</buildtool_depend>
-
+  
   <exec_depend>action_msgs</exec_depend>
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>franka_msgs</exec_depend>
